@@ -6,6 +6,7 @@
 
 ```
 git clone https://github.com/Bowen-Du/py4lesgo.git
+cd py4lesgo
 python setup.py install
 ```
 
