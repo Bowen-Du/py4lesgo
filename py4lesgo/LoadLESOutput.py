@@ -24,6 +24,8 @@ class Tavg:
     filepath is the same as Params class arguments
     """
     def __init__(self, p, coord, filepath, Pressure=True, Scalar=True, Budget=False, modify=True):
+        #quasi-steady check-up
+        self.getke(filepath)
         #velocity
         self.getVelocity(p, coord, filepath)
         #square of velocity
@@ -75,7 +77,11 @@ class Tavg:
         self.getMean(p, coord, Scalar)
         
 
-
+    def getke(self,filepath):
+        dummy = np.loadtxt(filepath+"\\output\\check_ke.dat")
+        self.t = dummy[:, 0]
+        self.ke = dummy[:, 1]
+    
     def getVelocity(self, p, coord, filepath):
         self.u = np.zeros((p.nx,p.ny,p.zmax_buf[coord-1]))
         self.v = np.zeros((p.nx,p.ny,p.zmax_buf[coord-1]))
