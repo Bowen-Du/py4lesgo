@@ -3,7 +3,8 @@ import re
 
 
 class Params():
-    """
+    def __init__(self, filepath, xc, yc, d, num_x, num_y):
+        """
         all parametes are nondimensional
         
         filepath is the path of the data file, which must consists of 
@@ -13,139 +14,176 @@ class Params():
         nondimensional form
         
         d is the diameter of turbine, using z_i as characteristic length scale.
-    """
-    #TODO build different arrays according to uv-plane or w-plane
-    def __init__(self, filepath, xc, yc, d):
-        
+
+        num_x and num_y are row numbers and column numbers of turbine, respectively
+        """
         filename = filepath + r"\output\lesgo_param.out"
         f = open(filename)
         # read the content in lesgo_param.out by line
-        lesgoParam = f.readlines()  
-        match = re.findall(r'\d{2}', lesgoParam[7])
-        self.nproc = int(match[0])
-        match = re.findall(r'\d{1,3}', lesgoParam[8])
-        self.nx = int(match[0])
-        self.ny = int(match[1])
-        self.nz2 = int(match[2])
-        self.nz_tot = int(match[3])
-        match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam[9])
-        self.z_i = float(match[0])
-        match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam[10])
-        self.L_x = float(match[0])
-        self.L_y = float(match[1])
-        self.L_z = float(match[2])
-        match = re.findall(r'\d\.\d{7}E\-\d{2}', lesgoParam[11])
-        self.dx = float(match[0])
-        self.dy = float(match[1])
-        self.dz = float(match[2])
-        match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam[20])
-        self.u_star = float(match[0])
-        match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam[21])
-        self.vonk = float(match[0])
-        match = re.findall(r'\d\.\d{7}E\-\d{2}', lesgoParam[24])
-        self.nu_molec = float(match[0])
-        match = re.findall(r'\d+', lesgoParam[30])
-        self.nsteps = int(match[0])
-        match = re.findall(r'\d\.\d{7}E\-\d{2}', lesgoParam[45])
-        self.zo = float(match[0])
-        match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam[51])
-        self.mean_p_force = float(match[0])
-        match = re.findall(r'LITTLE_ENDIAN|BIG_ENDIAN', lesgoParam[59])
-        self.write_endian = match[0]
-        match = re.findall(r'LITTLE_ENDIAN|BIG_ENDIAN', lesgoParam[60])
-        self.read_endian = match[0]
-        if self.write_endian == 'BIG_ENDIAN':
-            self.fmt = 's'
-        else:
-            self.fmt = 'a'
-        if 'T' in lesgoParam[66]:
-            self.avgVelocities=True
-            match = re.findall(r'\d+', lesgoParam[67])
-            self.tavg_nstart = int(match[0])
-            self.tavg_nend = int(match[1])
-            self.tavg_nskip = int(match[2])
-        else:
-            self.avgVelocities=False
-        if 'T' in lesgoParam[68]:
-            self.points=True
-            match = re.findall(r'\d+', lesgoParam[69])
-            self.point_nstart = int(match[0])
-            self.point_nend = int(match[1])
-            self.point_nskip = int(match[2])
-            #TODO improve this
-            match = re.findall(r'\d+', lesgoParam[70])
-            self.points = int(match[0])
-            self.point = np.zeros((self.points, 3))
-            for i in range(self.points):
-                match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam[71+i])
-                for j in range(3):
-                    self.point[i,j] = float(match[j])
-        else:
-            self.points=False
-            self.points=1
-        if 'T' in lesgoParam[72+self.points-1]:
-            self.domain_snapshots=True
-            match = re.findall(r'\d+', lesgoParam[73+self.points-1])
-            self.domain_nstart = int(match[0])
-            self.domain_nend = int(match[1])
-            self.domain_nskip = int(match[2])
-        else:
-            self.domain_snapshots=False
-        if 'T' in lesgoParam[74+self.points-1]:
-            self.x_snapshots=True
-            match = re.findall(r'\d+', lesgoParam[75+self.points-1])
-            self.xplane_nstart = int(match[0])
-            self.xplane_nend = int(match[1])
-            self.xplane_nskip = int(match[2])
-            match = re.findall(r'\d+', lesgoParam[76+self.points-1])
-            self.nx_planes = int(match[0])
-            self.x_plane = np.zeros(self.nx_planes)
-            for i in range(self.nx_planes):
-                match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam[76+self.points+i])
-                self.x_plane[i] = float(match[i])
-        else:
-            self.x_snapshots=False
-            self.nx_planes=3
-        if 'T' in lesgoParam[76+self.points+self.nx_planes]:
-            self.y_snapshots=True
-            match = re.findall(r'\d+', lesgoParam[77+self.points+self.nx_planes])
-            self.yplane_nstart = int(match[0])
-            self.yplane_nend = int(match[1])
-            self.yplane_nskip = int(match[2])
-            match = re.findall(r'\d+', lesgoParam[78+self.points+self.nx_planes])
-            self.ny_planes = int(match[0])
-            self.y_plane = np.zeros(self.ny_planes)
-            for i in range(self.nx_planes):
-                match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam[79+self.points+self.nx_planes+i])
-                self.y_plane[i] = float(match[i])
-        else:
-            self.y_snapshots=False
-            self.ny_planes=3
-        if 'T' in lesgoParam[79+self.points+self.nx_planes+self.ny_planes]:
-            self.z_snapshots=True
-            match = re.findall(r'\d+', lesgoParam[80+self.points+self.nx_planes+self.ny_planes])
-            self.zplane_nstart = int(match[0])
-            self.zplane_nend = int(match[1])
-            self.zplane_nskip = int(match[2])
-            match = re.findall(r'\d+', lesgoParam[81+self.points+self.nx_planes+self.ny_planes])
-            self.nz_planes = int(match[0])
-            self.z_plane = np.zeros(self.nz_planes)
-            for i in range(self.nz_planes):
-                match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam[82+self.points+self.nx_planes+self.ny_planes+i])
-                self.z_plane[i] = float(match[i])
-        else:
-            self.z_snapshots=False
-            self.nz_planes=3
-        self.avgScalar=None
-        if len(lesgoParam)>100:
-            self.avgScalar=True
-            match = re.findall(r'\d\.\d{7}E\+\d{2}|\d\.\d{7}E\-\d{2}|\-\d\.\d{7}E\-\d{2}', lesgoParam[len(lesgoParam)-9])
-            self.wt_s = float(match[0])
-            match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam[len(lesgoParam)-10])
-            self.T_scale = float(match[0])
-            match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam[len(lesgoParam)-35])
-            self.g = float(match[0])
+        EOF = False
+        self.avgScalar = False
+        while not EOF:
+            lesgoParam = f.readline()
+            linelist = lesgoParam.split(' ')
+            if len(lesgoParam) == 0:
+                EOF = True
+            else:
+                if linelist[0]=="nproc":
+                    match = re.findall(r'\d{2}', lesgoParam)
+                    self.nproc = int(match[0])
+                if linelist[0]=="nx,":
+                    match = re.findall(r'\d{1,3}', lesgoParam)
+                    self.nx = int(match[0])
+                    self.ny = int(match[1])
+                    self.nz2 = int(match[2])
+                    self.nz_tot = int(match[3])
+                if linelist[0]=="z_i":
+                    match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam)
+                    self.z_i = float(match[0])
+                if linelist[0]=="L_x,":
+                    match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam)
+                    self.L_x = float(match[0])
+                    self.L_y = float(match[1])
+                    self.L_z = float(match[2])
+                if linelist[0]=="dx,":
+                    match = re.findall(r'\d\.\d{7}E\-\d{2}', lesgoParam)
+                    self.dx = float(match[0])
+                    self.dy = float(match[1])
+                    self.dz = float(match[2])
+                if linelist[0]=="u_star":
+                    match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam)
+                    self.u_star = float(match[0])
+                if linelist[0]=="vonk":
+                    match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam)
+                    self.vonk = float(match[0])
+                if linelist[0]=="nu_molec":
+                    match = re.findall(r'\d\.\d{7}E\-\d{2}', lesgoParam)
+                    self.nu_molec = float(match[0])
+                if linelist[0]=="nsteps":
+                    match = re.findall(r'\d+', lesgoParam)
+                    self.nsteps = int(match[0])
+                if linelist[0]=="dt":
+                    match = re.findall(r'\d\.\d{7}E\-\d{2}', lesgoParam)
+                    if len(match)>0:
+                        self.dt = float(match[0])
+                    else:
+                        self.dt = False
+                if linelist[0]=="zo":
+                    match = re.findall(r'\d\.\d{7}E\-\d{2}', lesgoParam)
+                    self.zo = float(match[0])
+                #Scalar block
+                if linelist[0]=="wt_s":
+                    self.avgScalar=True
+                    match = re.findall(r'\d\.\d{7}E\+\d{2}|\d\.\d{7}E\-\d{2}|\-\d\.\d{7}E\-\d{2}', lesgoParam)
+                    self.wt_s = float(match[0])
+                if linelist[0]=="T_scale":
+                    match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam)
+                    self.T_scale = float(match[0])
+                if linelist[0]=="gravity":
+                    match = re.findall(r'\d\.\d{7}E\+\d{2}', lesgoParam)
+                    self.g = float(match[0])
+                # tavg block
+                if linelist[0]=="tavg_calc":
+                    if 'T' in lesgoParam:
+                        self.avgVelocities=True
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.tavg_nstart = int(match[0])
+                        self.tavg_nend = int(match[1])
+                        self.tavg_nskip = int(match[2])
+                    else:
+                        self.avgVelocities=False
+                # domain snap block
+                if linelist[0]=="domain_calc":
+                    if 'T' in lesgoParam:
+                        self.domain_snapshots=True
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.domain_nstart = int(match[0])
+                        self.domain_nend = int(match[1])
+                        self.domain_nskip = int(match[2])
+                    else:
+                        self.domain_snapshots=False
+                # point block
+                if linelist[0]=="point_calc":
+                    if 'T' in lesgoParam:
+                        self.points=True
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.point_nstart = int(match[0])
+                        self.point_nend = int(match[1])
+                        self.point_nskip = int(match[2])
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.points = int(match[0])
+                        self.point = np.zeros((self.points, 3))
+                        for i in range(self.points):
+                            lesgoParam = f.readline()
+                            match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam)
+                            for j in range(3):
+                                self.point[i,j] = float(match[j])
+                    else:
+                        self.points=False
+                # xplane block
+                if linelist[0]=="xplane_calc":
+                    if 'T' in lesgoParam:
+                        self.x_snapshots=True
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.xplane_nstart = int(match[0])
+                        self.xplane_nend = int(match[1])
+                        self.xplane_nskip = int(match[2])
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.nx_planes = int(match[0])
+                        self.x_plane = np.zeros(self.nx_planes)
+                        for i in range(self.nx_planes):
+                            lesgoParam = f.readline()
+                            match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam)
+                            self.x_plane[i] = float(match[i])
+                    else:
+                        self.x_snapshots=False
+                # yplane block
+                if linelist[0]=="yplane_calc":
+                    if 'T' in lesgoParam:
+                        self.y_snapshots=True
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.yplane_nstart = int(match[0])
+                        self.yplane_nend = int(match[1])
+                        self.yplane_nskip = int(match[2])
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.ny_planes = int(match[0])
+                        self.y_plane = np.zeros(self.ny_planes)
+                        for i in range(self.ny_planes):
+                            lesgoParam = f.readline()
+                            match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam)
+                            self.y_plane[i] = float(match[i])
+                    else:
+                        self.y_snapshots=False
+                # zplane block
+                if linelist[0]=="zplane_calc":
+                    if 'T' in lesgoParam:
+                        self.z_snapshots=True
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.zplane_nstart = int(match[0])
+                        self.zplane_nend = int(match[1])
+                        self.zplane_nskip = int(match[2])
+                        lesgoParam = f.readline()
+                        match = re.findall(r'\d+', lesgoParam)
+                        self.nz_planes = int(match[0])
+                        self.z_plane = np.zeros(self.nz_planes)
+                        for i in range(self.nz_planes):
+                            lesgoParam = f.readline()
+                            match = re.findall(r'\d\.\d{7}E[+,-]\d{2}', lesgoParam)
+                            self.z_plane[i] = float(match[i])
+                    else:
+                        self.z_snapshots=False
         f.close()
+        self.num_x=num_x
+        self.num_y=num_y
         #notice the difference between random.randint and nself.random.randint
         #random.randint can produce a random int in [a,b](only one)
         #nself.random.randint can produce a series of random int
@@ -169,11 +207,14 @@ class Params():
     def getGrid(self, xc, yc, d):
         #获取计算域的网格坐标
         '''
-        acquire the grid coordinates
+        obtain the grid coordinates
         input:
-            xc:turbine's x location(nondimensional) relative to origin domain
-            yc:turbine's y location(nondimensional) relative to origin domain
-            d:turbine rotor's diameter(nondimensional)
+            for single wind turbine:
+                xc:turbine's x location (nondimensional) relative to origin domain
+                yc:turbine's y location (nondimensional) relative to origin domain
+            for wind farm:
+                xc=0, zc=0 is OK
+            d:turbine rotor's diameter (nondimensional)
         ouput:
             1D, 2D and 3D coordinates which are used to plot figures
         '''

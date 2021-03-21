@@ -14,7 +14,7 @@ class BasicFig:
     None.
 
     """
-    def __init__(self):
+    def __init__(self,width="",typeset=""):
         """
         set the format of figure globally, which can be inheritted by other 
         class such as QualFig and QuanFig
@@ -25,26 +25,97 @@ class BasicFig:
 
         """
         
-        # plt.rcParams['savefig.format'] = 'pdf'
-        plt.rcParams['savefig.format']='svg'
-        #most journals: 9 cm (or 3.5 inch) for single column width and 18.5 cm (or 7.3 inch) for double column width.
-        plt.rcParams['figure.figsize'] = 8.27, 4.88
-        plt.rcParams['figure.dpi'] = 240
-        plt.rcParams['axes.titlesize']='large'
-        plt.rcParams['axes.labelsize']='large'
-        plt.rcParams['axes.titlepad']= 4.0
-        plt.rcParams['axes.labelpad']= 1.0
-        plt.rcParams['xtick.direction']='in'
-        plt.rcParams['xtick.major.pad']=5.0
-        # plt.rcParams['xtick.major.size']=3.0
-        plt.rcParams['xtick.labelsize'] = 'large'
-        plt.rcParams['ytick.direction']='in'
-        # plt.rcParams['ytick.major.pad']=2.0
-        # plt.rcParams['ytick.major.size']=3.0
-        plt.rcParams['ytick.labelsize'] = 'large'
-        plt.rcParams['text.usetex'] = True
-        plt.rcParams['legend.fontsize'] = 'medium'
-        plt.rcParams['figure.max_open_warning'] = 100
+        if width=="single column paper":
+            if typeset=="latex":
+                plt.rcParams['savefig.format']='eps'
+            elif typeset=="word":
+                plt.rcParams['savefig.format']="png"
+            #most journals: 9 cm (or 3.5 inch) for single column width and 18.5 cm (or 7.3 inch) for double column width.
+            plt.rcParams['figure.figsize'] = 3.5, 2
+            plt.rcParams['figure.dpi'] = 200
+            plt.rcParams['axes.titlesize']='medium'
+            plt.rcParams['axes.labelsize']='small'
+            # plt.rcParams['axes.titlepad']= 4.0
+            # plt.rcParams['axes.labelpad']= 1.0
+            plt.rcParams['xtick.direction']='in'
+            # plt.rcParams['xtick.major.pad']=5.0
+            # plt.rcParams['xtick.major.size']=3.0
+            plt.rcParams['xtick.labelsize'] = 'small'
+            plt.rcParams['ytick.direction']='in'
+            # plt.rcParams['ytick.major.pad']=2.0
+            # plt.rcParams['ytick.major.size']=3.0
+            plt.rcParams['ytick.labelsize'] = 'small'
+            plt.rcParams['text.usetex'] = True
+            plt.rcParams['legend.fontsize'] = 'small'
+            plt.rcParams['figure.max_open_warning'] = 100
+        elif width=="double column paper":
+            if typeset=="latex":
+                plt.rcParams['savefig.format']='eps'
+            elif typeset=="word":
+                plt.rcParams['savefig.format']="png"
+            #most journals: 9 cm (or 3.5 inch) for single column width and 18.5 cm (or 7.3 inch) for double column width.
+            plt.rcParams['figure.figsize'] = 7.3, 5
+            plt.rcParams['figure.dpi'] = 200
+            plt.rcParams['axes.titlesize']='xx-large'
+            plt.rcParams['axes.labelsize']='x-large'
+            plt.rcParams['axes.titlepad']= 4.0
+            plt.rcParams['axes.labelpad']= 1.0
+            plt.rcParams['xtick.direction']='in'
+            plt.rcParams['xtick.major.pad']=5.0
+            # plt.rcParams['xtick.major.size']=3.0
+            plt.rcParams['xtick.labelsize'] = 'x-large'
+            plt.rcParams['ytick.direction']='in'
+            # plt.rcParams['ytick.major.pad']=2.0
+            # plt.rcParams['ytick.major.size']=3.0
+            plt.rcParams['ytick.labelsize'] = 'x-large'
+            plt.rcParams['text.usetex'] = True
+            plt.rcParams['legend.fontsize'] = 'large'
+            plt.rcParams['figure.max_open_warning'] = 100
+        elif width=="PPT":
+            if typeset=="Beamer":
+                plt.rcParams['savefig.format']='eps'
+            elif typeset=="PPT":
+                plt.rcParams['savefig.format']="png"
+            #most journals: 9 cm (or 3.5 inch) for single column width and 18.5 cm (or 7.3 inch) for double column width.
+            plt.rcParams['figure.figsize'] = 5.33, 3
+            plt.rcParams['figure.dpi'] = 200
+            plt.rcParams['axes.titlesize']='xx-large'
+            plt.rcParams['axes.labelsize']='x-large'
+            plt.rcParams['axes.titlepad']= 4.0
+            plt.rcParams['axes.labelpad']= 1.0
+            plt.rcParams['xtick.direction']='in'
+            plt.rcParams['xtick.major.pad']=5.0
+            # plt.rcParams['xtick.major.size']=3.0
+            plt.rcParams['xtick.labelsize'] = 'x-large'
+            plt.rcParams['ytick.direction']='in'
+            # plt.rcParams['ytick.major.pad']=2.0
+            # plt.rcParams['ytick.major.size']=3.0
+            plt.rcParams['ytick.labelsize'] = 'x-large'
+            plt.rcParams['text.usetex'] = True
+            plt.rcParams['legend.fontsize'] = 'large'
+            plt.rcParams['figure.max_open_warning'] = 100
+        elif width=="default":
+            plt.rcdefaults()
+        # # plt.rcParams['savefig.format'] = 'pdf'
+        # plt.rcParams['savefig.format']='svg'
+        # #most journals: 9 cm (or 3.5 inch) for single column width and 18.5 cm (or 7.3 inch) for double column width.
+        # plt.rcParams['figure.figsize'] = 8.27, 4.88
+        # plt.rcParams['figure.dpi'] = 200
+        # plt.rcParams['axes.titlesize']='large'
+        # plt.rcParams['axes.labelsize']='large'
+        # plt.rcParams['axes.titlepad']= 4.0
+        # plt.rcParams['axes.labelpad']= 1.0
+        # plt.rcParams['xtick.direction']='in'
+        # plt.rcParams['xtick.major.pad']=5.0
+        # # plt.rcParams['xtick.major.size']=3.0
+        # plt.rcParams['xtick.labelsize'] = 'large'
+        # plt.rcParams['ytick.direction']='in'
+        # # plt.rcParams['ytick.major.pad']=2.0
+        # # plt.rcParams['ytick.major.size']=3.0
+        # plt.rcParams['ytick.labelsize'] = 'large'
+        # plt.rcParams['text.usetex'] = True
+        # plt.rcParams['legend.fontsize'] = 'medium'
+        # plt.rcParams['figure.max_open_warning'] = 100
         # plt.rcParams['axes.labelsize'] = 20
         # plt.rcParams['axes.titlesize'] = 20
         # 

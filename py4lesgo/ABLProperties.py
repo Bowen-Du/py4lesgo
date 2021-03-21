@@ -27,8 +27,11 @@ class ABLProperties:
     
     U_hub,u_star,<U>,<w'\theta'>,<\theta>,<u'w'>,<v'w'>,TIst,TIsp,TIv
     """
-    def __init__(self):
-        pass
+    def __init__(self, Scalar=True):
+        if Scalar==True:
+            self.Scalar=True
+        elif Scalar==False:
+            self.Scalar=False
     def extract(self, p, Tavg, Hhub, Uhub, ABL):
         self.p = p
         zmax=np.shape(Tavg.u)[2]
@@ -43,8 +46,9 @@ class ABLProperties:
         self.u_star = ustar[error.index(temp)]
         
         self.u = Tavg.uMean * self.u_star
-        self.wpthetap = (Tavg.wpthetapMean + Tavg.sgst3Mean) * self.u_star * p.T_scale
-        self.theta = Tavg.thetaMean * p.T_scale
+        if self.Scalar:
+            self.wpthetap = (Tavg.wpthetapMean + Tavg.sgst3Mean) * self.u_star * p.T_scale
+            self.theta = Tavg.thetaMean * p.T_scale
         self.upwp = (Tavg.txzMean + Tavg.uwMean) * self.u_star**2
         self.vpwp = (Tavg.tyzMean + Tavg.vwMean) * self.u_star**2
         self.TIst = np.sqrt(Tavg.uuMean) / self.U_hub
@@ -62,53 +66,56 @@ class ABLProperties:
         f = interpolate.interp1d(p.z_uv[0:zmax], np.sqrt(1/3*(self.TIst**2+self.TIsp**2+self.TIv_uv**2)))
         self.TI = f(Hhub)
         
-        L = np.zeros((p.nx,p.ny))
-        if Tavg.sgst3[:,:,0].any()!=0:
-            L = -self.u_star**2/(p.vonk*p.g*Tavg.sgst3[:,:,0])
-        self.L = np.mean(L)
-        dudz_w = partialz_uv_w(p, Tavg.u)  # w grid
-        # use wall model to calculate dudz, dvdz
-        ustar = np.zeros((p.nx, p.ny))
-        u_avg = np.zeros((p.nx, p.ny))
-        vonk = p.vonk
-        z0 = p.zo
-        k = 0  # wall model
-        Psi = np.zeros((p.nx,p.ny))
-        Phi = np.ones((p.nx,p.ny))
-        L = np.zeros((p.nx,p.ny))
-        ghat = 9.81 * p.z_i / p.u_star**2
-        if Tavg.sgst3[:,:,0].any() != 0:
-            L = Tavg.theta[:,:,0]/(vonk*ghat*Tavg.sgst3[:,:,0])
-        if ABL == "CBL":
-            x = np.power(1-16*0.5*p.dz/L,0.25)
-            Psi = 2*np.log(1/2*(1+x))+np.log(1/2*(1+x**2))-2*np.arctan(x)+np.pi/2
-            Phi = x**(-1)
-        elif ABL == "SBL":
-            Psi = -5*0.5*p.dz/L
-            Phi = 1 + 5*0.5*p.dz/L
-        # theoretical velocity in the first uv grid
-        demo = np.log(0.5 * p.dz / z0) - Psi
-        u_avg[:, :] = np.sqrt(Tavg.u[:, :, k]**2 + Tavg.v[:, :, k]**2)
-        ustar[:, :] = u_avg[:, :] * vonk / demo
-        # w grid
-        dudz_w[:, :, k] = ustar[:, :] / (
-        0.5 * p.dz * vonk) * Tavg.u[:, :, k] / u_avg[:, :]*Phi
-        # uv grid
-        dudz = interp_w_uv(p, dudz_w)
-        self.Rif=np.zeros(zmax)
-        for i in range(zmax):
-            self.Rif[i] = p.g*self.wpthetap[i]/self.theta[i]/\
-                (self.upwp[i]*np.mean(dudz[:,:,i]*self.u_star/p.z_i))
-        self.Rit=np.zeros(zmax)
-        dthetadz_w = partialz_uv_w(p, Tavg.theta)
-        dthetadz = interp_w_uv(p, dthetadz_w)
-        for i in range(zmax):
-            self.Rit[i] = p.g/self.theta[i]*np.mean(dthetadz[:,:,i])*p.T_scale/p.z_i/\
-                (np.mean(dudz[:,:,i])*self.u_star/p.z_i)**2
-        self.Ribb=p.g/self.theta[8]*(self.theta[8]-self.theta[3])*(p.z_uv[8]-p.z_uv[3])*p.z_i/\
-            (self.u[8]-self.u[3])**2
-        self.Ribt=p.g/self.theta[8]*(self.theta[13]-self.theta[8])*(p.z_uv[13]-p.z_uv[8])*p.z_i/\
-            (self.u[13]-self.u[8])**2
+        if self.Scalar:
+            L = np.zeros((p.nx,p.ny))
+            if Tavg.sgst3[:,:,0].any()!=0:
+                L = -self.u_star**2/(p.vonk*p.g*Tavg.sgst3[:,:,0])
+            self.L = np.mean(L)
+            dudz_w = partialz_uv_w(p, Tavg.u)  # w grid
+            # use wall model to calculate dudz, dvdz
+            ustar = np.zeros((p.nx, p.ny))
+            u_avg = np.zeros((p.nx, p.ny))
+            vonk = p.vonk
+            z0 = p.zo
+            k = 0  # wall model
+            Psi = np.zeros((p.nx,p.ny))
+            Phi = np.ones((p.nx,p.ny))
+            L = np.zeros((p.nx,p.ny))
+            ghat = 9.81 * p.z_i / p.u_star**2
+            if Tavg.sgst3[:,:,0].any() != 0:
+                L = Tavg.theta[:,:,0]/(vonk*ghat*Tavg.sgst3[:,:,0])
+            if ABL == "CBL":
+                x = np.power(1-16*0.5*p.dz/L,0.25)
+                Psi = 2*np.log(1/2*(1+x))+np.log(1/2*(1+x**2))-2*np.arctan(x)+np.pi/2
+                Phi = x**(-1)
+            elif ABL == "SBL":
+                Psi = -5*0.5*p.dz/L
+                Phi = 1 + 5*0.5*p.dz/L
+            # theoretical velocity in the first uv grid
+            demo = np.log(0.5 * p.dz / z0) - Psi
+            u_avg[:, :] = np.sqrt(Tavg.u[:, :, k]**2 + Tavg.v[:, :, k]**2)
+            ustar[:, :] = u_avg[:, :] * vonk / demo
+            # w grid
+            dudz_w[:, :, k] = ustar[:, :] / (
+            0.5 * p.dz * vonk) * Tavg.u[:, :, k] / u_avg[:, :]*Phi
+            # uv grid
+            dudz = interp_w_uv(p, dudz_w)
+            # TODO change the calculation method of Ri from "average first compute second" to "compute first average second"
+            self.Rif=np.zeros(zmax)
+            for i in range(zmax):
+                self.Rif[i] = p.g*self.wpthetap[i]/self.theta[i]/\
+                    (self.upwp[i]*np.mean(dudz[:,:,i]*self.u_star/p.z_i))
+    
+            self.Rit=np.zeros(zmax)
+            dthetadz_w = partialz_uv_w(p, Tavg.theta)
+            dthetadz = interp_w_uv(p, dthetadz_w)
+            for i in range(zmax):
+                self.Rit[i] = p.g/self.theta[i]*np.mean(dthetadz[:,:,i])*p.T_scale/p.z_i/\
+                    (np.mean(dudz[:,:,i])*self.u_star/p.z_i)**2
+            self.Ribb=p.g/self.theta[8]*(self.theta[8]-self.theta[3])*(p.z_uv[8]-p.z_uv[3])*p.z_i/\
+                (self.u[8]-self.u[3])**2
+            self.Ribt=p.g/self.theta[8]*(self.theta[13]-self.theta[8])*(p.z_uv[13]-p.z_uv[8])*p.z_i/\
+                (self.u[13]-self.u[8])**2
         
 
     def calnvd(self, blue, red):

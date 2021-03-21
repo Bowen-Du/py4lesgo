@@ -28,13 +28,13 @@ class QuanFig(BasicFig):
         dim is the instance of DataProcess
         """
         zmax=np.shape(tavg.u)[2]
-        if "CBL-L" in case:
+        if "CBL" in case:
             color='red'
         elif "NBL-H" in case:
             color='green'
         elif "NBL-L" in case:
             color='purple'
-        elif "SBL-H" in case:
+        elif "SBL" in case:
             color='blue'
         axs[0,0].plot(tavg.uMean * dim.u_star, p.Z1_uv[0:zmax], color, label=case)
         axs[0,0].plot([0, 15], [hub_height - 0.5, hub_height - 0.5], 'k--')
@@ -47,7 +47,7 @@ class QuanFig(BasicFig):
         if theta:
             if ABL=="CBL":
                 thetal=290
-                thetar=300
+                thetar=315
                 TIr=0.2
                 TIl=0.0
             else:
@@ -130,7 +130,7 @@ class QuanFig(BasicFig):
         else:
             print("Please input 'x', 'y' or 'z'!")
 
-    def Profiles(self, ax, p, data, ind, loc='', xloc=[], scatter=True):
+    def Profiles(self, ax, p, data, ind, loc='', xloc=[], turb_geo=[],scatter=True):
         """
         ax is the representation of the fig
         
@@ -156,7 +156,7 @@ class QuanFig(BasicFig):
             points[:,:,2]=ind
             u=interpn([p.x,p.y,p.z_uv[0:zmax]],data,points,bounds_error=False)
             for i in range(len(xloc)):
-                label = "H:x="+str(int(round((xloc[i]-0.4)/0.08))) + 'D'
+                label = "H:x="+str(int(round((xloc[i]-turb_geo[0])/turb_geo[1]))) + 'D'
                 if scatter==True:
                     self.Profile(ax, p, u[i, :], loc=loc, 
                                  label=label,marker=marker[i])
@@ -172,7 +172,7 @@ class QuanFig(BasicFig):
                 points[:,n,2]=p.z_uv[n]
             u=interpn([p.x,p.y,p.z_uv[0:zmax]],data,points,bounds_error=False)
             for i in range(len(xloc)):
-                label = "V:x="+str(int(round((xloc[i]-0.4)/0.08))) + 'D'
+                label = "V:x="+str(int(round((xloc[i]-turb_geo[0])/turb_geo[1]))) + 'D'
                 if scatter==True:
                     self.Profile(ax, p, u[i, :], loc=loc, 
                                  label=label, linestyle='--',marker=marker[i])
