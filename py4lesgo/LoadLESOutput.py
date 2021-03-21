@@ -1,6 +1,16 @@
 import numpy as np
 from .PartialInterp import interp_w_uv,interp_uv_w
-
+class Turbine:
+    def __init__(self):
+        self.tdim=0
+        self.ucenter=0
+        self.vcenter=0
+        self.wcenter=0
+        self.u_d=0
+        self.u_d_T=0
+        self.theta1=0
+        self.theta2=0
+        self.Ctprime=0
 class Tavg:
     """
     A class which consists of time-averaged flow statistics
@@ -13,7 +23,7 @@ class Tavg:
     
     filepath is the same as Params class arguments
     """
-    def __init__(self, p, coord, filepath, Scalar=True, Budget=False, modify=True):
+    def __init__(self, p, coord, filepath, Pressure=False, Scalar=False, Budget=False, modify=True):
         #velocity
         self.getVelocity(p, coord, filepath)
         #square of velocity
@@ -28,29 +38,13 @@ class Tavg:
         self.getSgsStress(p, coord, filepath)
         #square of Smagorinsky coefficient
         self.getCs_opt2(p, coord, filepath)
-        #pressure*
-        self.getPre(p, coord, filepath)
-        #product of pressure and velocity(pressure)
-        self.getPV(p, coord, filepath)
-        #velocity(pressure)-pressure covariance
-        self.getPpVp(p, coord, filepath)
-        #build a linear-momentum-transporting velocity field
-        self.buildum()
-        #build the kinetic energy transport velocity field
-        self.builduk()
-        #wind turbine induced force
-        if "blue" in filepath:
-            self.getForce(p, coord, filepath)
-            #self.getCt(p, filepath)
-            if "simulation" in filepath:
-                self.getCt(p, filepath)
-        if Budget:
-            self.getppSijp(p, coord, filepath)
-            self.getuipujpukp(p, coord, filepath)
-            self.getuptaup(p, coord, filepath)
-            self.gettaupduidxjp(p, coord, filepath)
-            if "blue" in filepath:
-                self.getfipujp(p, coord, filepath)
+        if Pressure:
+            #pressure*
+            self.getPre(p, coord, filepath)
+            #product of pressure and velocity(pressure)
+            self.getPV(p, coord, filepath)
+            #velocity(pressure)-pressure covariance
+            self.getPpVp(p, coord, filepath)
         if Scalar:
             #potential temperature
             self.getScalar(p, coord, filepath)
@@ -60,6 +54,23 @@ class Tavg:
             self.getScalar2(p, coord, filepath)
             #velocity(temperature,pressure)-temperature covariance
             self.getScalarRS(p, coord, filepath)
+        if Budget:
+            self.getppSijp(p, coord, filepath)
+            self.getuipujpukp(p, coord, filepath)
+            self.getuptaup(p, coord, filepath)
+            self.gettaupduidxjp(p, coord, filepath)
+            if "blue" in filepath:
+                self.getfipujp(p, coord, filepath)
+        #build a linear-momentum-transporting velocity field
+        self.buildum()
+        #build the kinetic energy transport velocity field
+        self.builduk()
+        #wind turbine induced force
+        if "blue" in filepath:
+            self.getForce(p, coord, filepath)
+            self.turbines=[Turbine()]*p.num_x*p.num_y
+            for i in range(p.num_x*p.num_y):
+                self.getCt(p, i, filepath)  
         #Horizontal-plane mean
         self.getMean(p, coord, Scalar)
         
@@ -449,17 +460,17 @@ class Tavg:
             self.sgst3Mean = np.mean(self.sgst3,axis=(0,1))
         else:
             self.thetaMean = np.ones(p.zmax_buf[coord-1])
-    def getCt(self, p, filepath):
-        dummy=np.loadtxt(filepath+"\\turbine\\turbine_1.dat")
-        self.tdim=dummy[:,0]
-        self.ucenter=dummy[:,1]
-        self.vcenter=dummy[:,2]
-        self.wcenter=dummy[:,3]
-        self.u_d=dummy[:,4]
-        self.u_d_T=dummy[:,5]
-        self.theta1=dummy[:,6]
-        self.theta2=dummy[:,7]
-        self.Ctprime=dummy[:,8]
+    def getCt(self, p, i, filepath):
+        dummy=np.loadtxt(filepath+"\\turbine\\turbine_"+str(i+1)+".dat")
+        self.turbines[i].tdim=dummy[:,0]
+        self.turbines[i].ucenter=dummy[:,1]
+        self.turbines[i].vcenter=dummy[:,2]
+        self.turbines[i].wcenter=dummy[:,3]
+        self.turbines[i].u_d=dummy[:,4]
+        self.turbines[i].u_d_T=dummy[:,5]
+        self.turbines[i].theta1=dummy[:,6]
+        self.turbines[i].theta2=dummy[:,7]
+        self.turbines[i].Ctprime=dummy[:,8]
 
 class Snap:
     def __init__(self, p, coord, snap_time, filepath, Scalar=False):
