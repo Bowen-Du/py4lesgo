@@ -23,23 +23,25 @@ class Tavg:
     
     filepath is the same as Params class arguments
     """
-    def __init__(self, p, coord, filepath, Pressure=True, Scalar=True, Budget=False, modify=True):
+    def __init__(self, p, coord, filepath, Pressure=True, Scalar=True, ReyStress=True, SgsStress=False, Budget=False, modify=True):
         #quasi-steady check-up
         self.getke(filepath)
         #velocity
         self.getVelocity(p, coord, filepath)
         #square of velocity
-        self.getSqOVel(p, coord, filepath)
-        #Reynold stress
-        self.getReyStress(p, coord, filepath)
-        if modify == True:
-            self.uw = self.uw2-interp_uv_w(p, self.u)*self.w
-        self.ww_uv = interp_w_uv(p, self.ww)
-        self.TI = np.sqrt(1 / 3 * (self.uu + self.vv + self.ww_uv))
+        # self.getSqOVel(p, coord, filepath)
+        if ReyStress:
+            #Reynold stress
+            self.getReyStress(p, coord, filepath)
+        # if modify == True:
+        #     self.uw = self.uw2-interp_uv_w(p, self.u)*self.w
+            self.ww_uv = interp_w_uv(p, self.ww)
+            self.TI = np.sqrt(1 / 3 * (self.uu + self.vv + self.ww_uv))
         #sgs stress
-        self.getSgsStress(p, coord, filepath)
-        #square of Smagorinsky coefficient
-        self.getCs_opt2(p, coord, filepath)
+        if SgsStress:
+            self.getSgsStress(p, coord, filepath)
+            #square of Smagorinsky coefficient
+            self.getCs_opt2(p, coord, filepath)
         if Pressure:
             #pressure*
             self.getPre(p, coord, filepath)
