@@ -23,7 +23,7 @@ class Tavg:
     
     filepath is the same as Params class arguments
     """
-    def __init__(self, p, coord, filepath, Pressure=True, Scalar=True, ReyStress=True, SgsStress=False, Budget=False, modify=True):
+    def __init__(self, p, coord, filepath, Pressure=True, Scalar=True, ReyStress=True, SgsStress=True, Budget=False, modify=True):
         #quasi-steady check-up
         self.getke(filepath)
         #velocity

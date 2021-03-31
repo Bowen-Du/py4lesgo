@@ -13,7 +13,7 @@ class QuanFig(BasicFig):
     Inherit the plot format defined in the __init__ of BasiFig
     """
         super().__init__()
-    def casefig(self, p, axs, tavg, hub_height, ylim, dim, case, ABL, theta=True):
+    def casefig(self, p, axs, tavg, hub_height, ylim, dim, case, color, ABL, theta=True):
         """
         p is the instance of Params
         
@@ -146,7 +146,8 @@ class QuanFig(BasicFig):
         """
         #TODO找最近的索引值，避免插值
         zmax=np.shape(data)[2]
-        marker=['o','s','v','3','*','h','+','D',]
+        marker=['o','s','v','3','*','h','+','D',
+                '.','_','|','1','2','3','4','x']
         if loc == 'y':
             points=np.zeros((len(xloc),p.ny,3))
             for m in range(len(xloc)):
@@ -184,6 +185,7 @@ class QuanFig(BasicFig):
                    ax,
                    p,
                    Nvd,
+                   turb_geo=[],
                    xloc=[],
                    ylim=[],
                    zlim=[],
@@ -192,7 +194,8 @@ class QuanFig(BasicFig):
                    zloc=None,
                    half=True):
         zmax=np.shape(Nvd)[2]
-        marker=['o','s','v','3','*','h','+','D',]
+        marker=['o','s','v','3','*','h','+','D',
+                '.','_','|','1','2','3','4','x']
         # index = [0] * len(xloc)
         # for i in range(len(xloc)):
         #     index[i] = (np.abs(xloc[i] - p.x)).argmin()
@@ -206,7 +209,7 @@ class QuanFig(BasicFig):
             ax.plot(xs, ys, 'k', label='Gaussian')
             if yloc is not None:
                 labelv = ['Gaussian'] + [
-                    'V:x=' + str(int(round((xloc[i]-0.4)/0.08))) + 'D'
+                    'V:x=' + str(int(round((xloc[i]-turb_geo[0])/turb_geo[1]))) + 'D'
                     for i in range(len(xloc))
                 ]
                 points=np.zeros((len(xloc),p.nz_tot,3))
@@ -229,7 +232,7 @@ class QuanFig(BasicFig):
                 #ax.legend(labelv,loc="upper right")
             if zloc is not None:
                 labelh = ['Gaussian'] + [
-                    'H:x=' + str(int(round((xloc[i]-0.4)/0.08))) + 'D'
+                    'H:x=' + str(int(round((xloc[i]-turb_geo[0])/turb_geo[1]))) + 'D'
                     for i in range(len(xloc))
                 ]
                 points=np.zeros((len(xloc),p.ny,3))
@@ -257,7 +260,7 @@ class QuanFig(BasicFig):
             ax.plot(xs, ys, 'k', label='Gaussian')
             if yloc is not None:
                 labelv = ['Gaussian'] + [
-                    'V:x=' + str(int(round((xloc[i]-0.4)/0.08))) + 'D'
+                    'V:x=' + str(int(round((xloc[i]-turb_geo[0])/turb_geo[1]))) + 'D'
                     for i in range(len(xloc))
                 ]
                 points=np.zeros((len(xloc),zmax,3))
@@ -275,7 +278,6 @@ class QuanFig(BasicFig):
                     f = interpolate.interp1d(u[i,z[0][0]:zlim[1]],
                                              p.Z1_uv[z[0][0]:zlim[1]])
                     rw[i] = abs(f(Nvdmax[i] / 2))
-                    print(p.Z1_uv[z])
                     if line:
                         ax.plot((p.Z1_uv[zlim[0]:zlim[1]] - p.Z1_uv[z])/
                                 (rw[i] - p.Z1_uv[z]),
@@ -290,10 +292,11 @@ class QuanFig(BasicFig):
                                    marker=marker[i],
                                    label=labelv[i + 1])
                 print(rw)
+                return u
                 #ax.legend(labelv,loc="upper right")
             if zloc is not None:
                 labelh = ['Gaussian'] + [
-                    'H:x=' + str(int(round((xloc[i]-0.4)/0.08))) + 'D'
+                    'H:x=' + str(int(round((xloc[i]-turb_geo[0])/turb_geo[1]))) + 'D'
                     for i in range(len(xloc))
                 ]
                 points=np.zeros((len(xloc),p.ny,3))
@@ -324,5 +327,6 @@ class QuanFig(BasicFig):
                                    marker=marker[i],
                                    label=labelh[i + 1])
                 print(rw)
+                return u
                 #ax.legend(labelh,loc="upper right")
                 
